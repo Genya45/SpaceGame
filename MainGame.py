@@ -7,6 +7,8 @@ from BulletClass import Bullet
 from UserShipClass import UserShip
 from EnemyAsteroidClass import EnemyAsteroid
 from math import sqrt
+import random
+import os
 
 winWidth = 600
 winHeight = 600
@@ -17,14 +19,17 @@ ENEMY_ASTEROID_TICKS_MAX = 100
 FPS = 10
 #clockFPS = pygame.time.Clock()
 
+imageBackgroundSpaceNumber = None
+
 isRunMainLoop = True
 
 imageStarShip = None
 imageBackgroundSpace = None
 
 
-win = pygame.display.set_mode((winWidth,winHeight), pygame.RESIZABLE)
-print(win.get_size())
+
+
+win = pygame.display.set_mode((winWidth,winHeight), pygame.RESIZABLE | pygame.DOUBLEBUF | pygame.HWSURFACE)
 pygame.display.set_caption("Cosmo Game")
 
 
@@ -33,15 +38,25 @@ enemyAsteroidList = []
 enemyAsteroidTicks = 0
 userShip = UserShip(winWidth/2, winHeight-winHeight/3)
 
+def getCountsImagesBackgroundSpace(pathImages):
+    list = os.listdir(pathImages)
+    return len(list)
+    
+
+
 def imageLoader():
     global imageStarShip
     global imageBackgroundSpace
+    global imageBackgroundSpaceNumber
+
+    imageBackgroundSpaceNumber = random.randint(1,getCountsImagesBackgroundSpace("assets/images/backgrounds/"))
 
     imageStarShip = pygame.image.load('assets/images/starShipMain.png')
     #imageStarShip = pygame.transform.rotate(imageStarShip, 18)
-    imageStarShip = pygame.transform.scale(imageStarShip, (50, 50))
+    imageStarShip = pygame.transform.scale(imageStarShip, (userShip.width, userShip.height))
     imageStarShip.set_colorkey((255,255,255))
-    imageBackgroundSpace = pygame.image.load('assets/images/backgroundSpace.jpg')
+    imageBackgroundSpace = pygame.image.load('assets/images/backgrounds/backgroundSpace' + str(imageBackgroundSpaceNumber) + '.jpg')
+    #imageBackgroundSpace = pygame.transform.scale(imageBackgroundSpace, win.get_size())
 
 
 def enemyAsteroidUpdated():
@@ -61,6 +76,7 @@ def enemyAsteroidUpdated():
             if sqrt((bullet.posX - enemyAsteroid.posX)**2 + (bullet.posY - enemyAsteroid.posY)**2) < (enemyAsteroid.radius + bullet.radius):
                 bulletsList.pop(indexBull)
                 enemyAsteroidList.pop(indexAsteroid)
+                continue
 
         #Пример работы алгоритма.
         #https://math.semestr.ru/math/plot.php
@@ -73,10 +89,13 @@ def enemyAsteroidUpdated():
                 (enemyAsteroid.posX < (userShip.posX + userShip.width + enemyAsteroid.radius)) and \
                 (enemyAsteroid.posY > (userShip.posY - enemyAsteroid.radius)) and \
                 (enemyAsteroid.posY < (userShip.posY + userShip.height + enemyAsteroid.radius)):
-            enemyAsteroidList.pop(indexAsteroid)
+            if len(enemyAsteroidList):
+                enemyAsteroidList.pop(indexAsteroid)                
+                continue
         
         if enemyAsteroid.isBorderOut():
             enemyAsteroidList.pop(indexAsteroid)
+            continue
     
 
 def keyTest():
@@ -98,9 +117,12 @@ def eventTest():
     global isRunMainLoop
     global winWidth
     global winHeight
+    global imageBackgroundSpace
     for event in pygame.event.get():
         if event.type == pygame.VIDEORESIZE:    
-            winWidth, winHeight = win.get_size()
+            winWidth, winHeight = win.get_size()              
+            imageBackgroundSpace = pygame.image.load('assets/images/backgrounds/backgroundSpace' + str(imageBackgroundSpaceNumber) + '.jpg')       
+            #imageBackgroundSpace = pygame.transform.scale(imageBackgroundSpace, win.get_size())
         if event.type == pygame.QUIT:
             isRunMainLoop = False
             print("quit")
@@ -112,7 +134,7 @@ def eventTest():
                 break
             if event.key == pygame.K_SPACE:
                 if len(bulletsList) < userShip.maxCountBullets:
-                    bulletsList.append(Bullet(userShip.posX + userShip.width / 2, userShip.posY))
+                    bulletsList.append(Bullet(userShip.posX + userShip.width / 2, userShip.posY, userShip.bulletSpeed))
 
 def userBulletsUpdted():
     for indexBull, bullet in enumerate(bulletsList):

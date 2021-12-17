@@ -5,7 +5,8 @@ class UserShip:
         self.speed = 5
         self.height = height
         self.width = width
-        self.maxCountBullets = 2
+        self.maxCountBullets = 1
+        self.bulletSpeed = 4
 
     #def update_position(self):
     #    self.posY -= self.speed

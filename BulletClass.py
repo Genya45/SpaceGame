@@ -2,11 +2,11 @@ import random
 
 
 class Bullet:
-    def __init__(self, posX, posY):
+    def __init__(self, posX, posY, speed = 10):
         self.posX = posX
         self.posY = posY
         self.radius = 5
-        self.speed = 10
+        self.speed = speed
 
     def update_position(self):
         self.posY -= self.speed
