@@ -12,15 +12,15 @@ class Menu():
         self.isRunMainLoop = True
 
         
-        self.fontPath = 'assets/fonts/solid.ttf'
+        self.__FONT_PATH__ = 'assets/fonts/solid.ttf'
         self.font = None
 
         
-        self.imagePathBackgroundSpace = "assets/images/backgrounds/"        
+        self.__IMG_PATH_BKG_SPACE__ = "assets/images/backgrounds/"     
         self.imageBackgroundSpace = None
         self.imageBackgroundSpaceNumber = None
         
-        self.imagePathAsteroids = "assets/images/asteroids/" 
+        self.__IMG_PATH_ASTEROIDS__ = "assets/images/asteroids/" 
         self.enemyAsteroidTicks = 0
         self.enemyAsteroidTicksMax = 20
         self.enemyAsteroidList = []
@@ -35,17 +35,17 @@ class Menu():
 
 
     def imageLoader(self):
-        listImagesBackgroundSpace = os.listdir(self.imagePathBackgroundSpace)
+        listImagesBackgroundSpace = os.listdir(self.__IMG_PATH_BKG_SPACE__)
         self.imageBackgroundSpaceNumber = random.randint(0, len(listImagesBackgroundSpace) - 1)
-        self.imageBackgroundSpace = pygame.image.load(self.imagePathBackgroundSpace + listImagesBackgroundSpace[self.imageBackgroundSpaceNumber])
+        self.imageBackgroundSpace = pygame.image.load(self.__IMG_PATH_BKG_SPACE__ + listImagesBackgroundSpace[self.imageBackgroundSpaceNumber])
         self.imageBackgroundSpace = pygame.transform.scale(self.imageBackgroundSpace, self.win.get_size())
         
-        for imageAsteroid in os.listdir(self.imagePathAsteroids):       
-            asteroidImage = pygame.image.load(self.imagePathAsteroids + imageAsteroid)
+        for imageAsteroid in os.listdir(self.__IMG_PATH_ASTEROIDS__):       
+            asteroidImage = pygame.image.load(self.__IMG_PATH_ASTEROIDS__ + imageAsteroid)
             self.asteroidsListImages.append(asteroidImage)
 
     def fontLoader(self):
-        self.font = pygame.font.Font(self.fontPath, 50)
+        self.font = pygame.font.Font(self.__FONT_PATH__, 50)
 
 
     

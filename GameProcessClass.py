@@ -22,18 +22,18 @@ class GameProcess():
         self.userBulletImagesList = []        
         self.enemyAsteroidBoomImagesList = []
 
-        self.fontScorePath = 'assets/fonts/Space Age.ttf'
+        self.__FONT_SCORE_PATH__ = 'assets/fonts/Space Age.ttf'
         self.fontScore = None
-        self.fontGameOverPath = 'assets/fonts/blocked.ttf'
+        self.__FONT_GAME_OVER_PATH__ = 'assets/fonts/blocked.ttf'
         self.fontGameOver = None
-        self.fontContinuePath = 'assets/fonts/solid.ttf'
+        self.__FONT_CONTINUE_PATH__ = 'assets/fonts/solid.ttf'
         self.fontContinue = None
 
-        self.imagePathAsteroids = "assets/images/asteroids/"
-        self.imagePathAsteroidsBoom = "assets/images/asteroidsBoom/"
-        self.imagePathBackgroundSpace = "assets/images/backgrounds/"
-        self.imagePathStarShip = "assets/images/userStarShips/"
-        self.imagePathUserBullet = "assets/images/userBullets/"
+        self.__IMG_PATH_ASTEROIDS__ = "assets/images/asteroids/"
+        self.__IMG_PATH_ASTEROIDS_BOOM__ = "assets/images/asteroidsBoom/"
+        self.__IMG_PATH_BKG_SPACE__ = "assets/images/backgrounds/"
+        self._IMG_PATH_STAR_SHIP__ = "assets/images/userStarShips/"
+        self.__IMG_PATH_USER_BULLET__ = "assets/images/userBullets/"
 
         self.bulletsList = []
 
@@ -51,26 +51,30 @@ class GameProcess():
         self.scoreTickTimeMax = 10
         self.score = 0
 
+        #self.songShot = None
+        #self.__SONG_SHOT_PATH__ = 'assets/sounds/Shot1.mp3'
+
         self.userShip = UserShip(self.winWidth/2, self.winHeight-self.winHeight/3, self.winWidth, self.winHeight)
 
         self.isGameOver = False
 
         self.imageLoader()
         self.fontLoader()
+        #self.songLoader()
 
 
     def imageLoader(self):
-        for imageAsteroid in os.listdir(self.imagePathAsteroids):       
-            asteroidImage = pygame.image.load(self.imagePathAsteroids + imageAsteroid)
+        for imageAsteroid in os.listdir(self.__IMG_PATH_ASTEROIDS__):       
+            asteroidImage = pygame.image.load(self.__IMG_PATH_ASTEROIDS__ + imageAsteroid)
             #asteroidImage = pygame.transform.scale(asteroidImage, (50,50))
             self.asteroidsListImages.append(asteroidImage)
         
-        for imageAteroidBoom in os.listdir(self.imagePathAsteroidsBoom):
-            imageBoom = pygame.image.load(self.imagePathAsteroidsBoom + imageAteroidBoom)
+        for imageAteroidBoom in os.listdir(self.__IMG_PATH_ASTEROIDS_BOOM__):
+            imageBoom = pygame.image.load(self.__IMG_PATH_ASTEROIDS_BOOM__ + imageAteroidBoom)
             self.enemyAsteroidBoomImagesList.append(imageBoom)
         
-        for imageStarship in os.listdir(self.imagePathStarShip):
-            imgStarship = pygame.image.load(self.imagePathStarShip + imageStarship)
+        for imageStarship in os.listdir(self._IMG_PATH_STAR_SHIP__):
+            imgStarship = pygame.image.load(self._IMG_PATH_STAR_SHIP__ + imageStarship)
             imgStarship = pygame.transform.scale(imgStarship, (self.userShip.width, self.userShip.height))
             self.imageStarShipList.append(imgStarship)
         self.userShip.imageList = self.imageStarShipList
@@ -79,16 +83,19 @@ class GameProcess():
                 self.userShip.imageBoomList[i] = pygame.transform.scale(self.userShip.imageBoomList[i], (self.userShip.width, self.userShip.height))
 
 
-        for imageBullet in os.listdir(self.imagePathUserBullet):
-            image = pygame.image.load(self.imagePathUserBullet + imageBullet)
+        for imageBullet in os.listdir(self.__IMG_PATH_USER_BULLET__):
+            image = pygame.image.load(self.__IMG_PATH_USER_BULLET__ + imageBullet)
             #image = pygame.transform.scale(image, (20,20))
             self.userBulletImagesList.append(image)
 
     def fontLoader(self):
-        self.fontScore = pygame.font.Font(self.fontScorePath, 30)
-        self.fontContinue = pygame.font.Font(self.fontContinuePath, 30)
-        self.fontGameOver = pygame.font.Font(self.fontGameOverPath, 70)
-        
+        self.fontScore = pygame.font.Font(self.__FONT_SCORE_PATH__, 30)
+        self.fontContinue = pygame.font.Font(self.__FONT_CONTINUE_PATH__, 30)
+        self.fontGameOver = pygame.font.Font(self.__FONT_GAME_OVER_PATH__, 70)
+    
+    #def songLoader(self):        
+    #    self.songShot = pygame.mixer.Sound(self.__SONG_SHOT_PATH__)
+
 
 
 
@@ -168,7 +175,7 @@ class GameProcess():
             if event.type == pygame.VIDEORESIZE:    
                 self.winWidth, self.winHeight = self.win.get_size()  
                 self.userShip.maxW, self.userShip.maxH = self.winWidth, self.winHeight   
-                self.imageBackgroundSpace = pygame.image.load(self.imagePathBackgroundSpace + os.listdir(self.imagePathBackgroundSpace)[self.imageBackgroundSpaceNumber])               
+                self.imageBackgroundSpace = pygame.image.load(self.__IMG_PATH_BKG_SPACE__ + os.listdir(self.__IMG_PATH_BKG_SPACE__)[self.imageBackgroundSpaceNumber])               
                 self.imageBackgroundSpace = pygame.transform.scale(self.imageBackgroundSpace, self.win.get_size())
 
             if event.type == pygame.QUIT:
@@ -184,6 +191,7 @@ class GameProcess():
                 if event.key == pygame.K_SPACE:
                     if len(self.bulletsList) < self.userShip.maxCountBullets and self.userShip.isBoom == False:
                         self.bulletsList.append(Bullet(self.userShip.posX + self.userShip.width / 2, self.userShip.posY-5, self.userBulletImagesList.copy(), self.userShip.bulletSpeed))
+                        #self.songShot.play()
 
     def userBulletsUpdted(self):
         for indexBull, bullet in enumerate(self.bulletsList):
