@@ -32,7 +32,7 @@ class GameProcess():
         self.__IMG_PATH_ASTEROIDS__ = "assets/images/asteroids/"
         self.__IMG_PATH_ASTEROIDS_BOOM__ = "assets/images/asteroidsBoom/"
         self.__IMG_PATH_BKG_SPACE__ = "assets/images/backgrounds/"
-        self._IMG_PATH_STAR_SHIP__ = "assets/images/userStarShips/"
+        self.__IMG_PATH_STAR_SHIP__ = "assets/images/userStarShips/"
         self.__IMG_PATH_USER_BULLET__ = "assets/images/userBullets/"
 
         self.bulletsList = []
@@ -51,8 +51,16 @@ class GameProcess():
         self.scoreTickTimeMax = 10
         self.score = 0
 
-        #self.songShot = None
-        #self.__SONG_SHOT_PATH__ = 'assets/sounds/Shot1.mp3'
+        self.songShot = None
+        self.__SONG_SHOT_PATH__ = 'assets/sounds/Shot.mp3'
+        self.songBoomAsteroid = None
+        self.__SONG_BOOM_ATEROID_PATH__ = 'assets/sounds/Crash.mp3'
+        self.songBoomUserShip = None
+        self.__SONG_BOOM_USER_SHIP_PATH__ = 'assets/sounds/Crash.mp3'
+        self.songGameOver = None
+        self.__S0NG_GAME_OVER_PATH__ = 'assets/sounds/GameOver.mp3'
+        
+        self.__MUSIC_BACKGROUND_PATH__ = 'assets/music/GameProcess/'
 
         self.userShip = UserShip(self.winWidth/2, self.winHeight-self.winHeight/3, self.winWidth, self.winHeight)
 
@@ -60,7 +68,7 @@ class GameProcess():
 
         self.imageLoader()
         self.fontLoader()
-        #self.songLoader()
+        self.songLoader()
 
 
     def imageLoader(self):
@@ -73,8 +81,8 @@ class GameProcess():
             imageBoom = pygame.image.load(self.__IMG_PATH_ASTEROIDS_BOOM__ + imageAteroidBoom)
             self.enemyAsteroidBoomImagesList.append(imageBoom)
         
-        for imageStarship in os.listdir(self._IMG_PATH_STAR_SHIP__):
-            imgStarship = pygame.image.load(self._IMG_PATH_STAR_SHIP__ + imageStarship)
+        for imageStarship in os.listdir(self.__IMG_PATH_STAR_SHIP__):
+            imgStarship = pygame.image.load(self.__IMG_PATH_STAR_SHIP__ + imageStarship)
             imgStarship = pygame.transform.scale(imgStarship, (self.userShip.width, self.userShip.height))
             self.imageStarShipList.append(imgStarship)
         self.userShip.imageList = self.imageStarShipList
@@ -93,8 +101,19 @@ class GameProcess():
         self.fontContinue = pygame.font.Font(self.__FONT_CONTINUE_PATH__, 30)
         self.fontGameOver = pygame.font.Font(self.__FONT_GAME_OVER_PATH__, 70)
     
-    #def songLoader(self):        
-    #    self.songShot = pygame.mixer.Sound(self.__SONG_SHOT_PATH__)
+    def songLoader(self):        
+        self.songShot = pygame.mixer.Sound(self.__SONG_SHOT_PATH__)
+        self.songGameOver = pygame.mixer.Sound(self.__S0NG_GAME_OVER_PATH__)
+        self.songBoomAsteroid = pygame.mixer.Sound(self.__SONG_BOOM_ATEROID_PATH__)
+        self.songBoomUserShip = pygame.mixer.Sound(self.__SONG_BOOM_USER_SHIP_PATH__)
+        
+        
+        listMusic = os.listdir(self.__MUSIC_BACKGROUND_PATH__)
+        musicNum = random.randint(0, len(listMusic) - 1)
+        
+        pygame.mixer.music.load(self.__MUSIC_BACKGROUND_PATH__ + listMusic[musicNum])
+        pygame.mixer.music.set_volume(0.5)
+        pygame.mixer.music.play()
 
 
 
@@ -127,6 +146,7 @@ class GameProcess():
                         self.bulletsList.pop(indexBull)
                         #self.enemyAsteroidList.pop(indexAsteroid)
                         enemyAsteroid.isBoom = True
+                        self.songBoomAsteroid.play()
                         self.score += 100
                         continue
 
@@ -143,8 +163,10 @@ class GameProcess():
                         (enemyAsteroid.posY < (self.userShip.posY + self.userShip.height + enemyAsteroid.radius) and
                         self.userShip.isBoom == False):
                     self.userShip.shipBoom()
+                    self.songBoomUserShip.play()
                     if self.userShip.life <= 0:
                         self.isGameOver = True
+                        self.songGameOver.play()
                     if len(self.enemyAsteroidList):
                         self.enemyAsteroidList.pop(indexAsteroid)                
                         continue
@@ -180,18 +202,21 @@ class GameProcess():
 
             if event.type == pygame.QUIT:
                 self.isRunMainLoop = False
+                pygame.mixer.music.stop()
                 break
             if event.type == pygame.KEYDOWN:                        
                 if event.key == pygame.K_ESCAPE:
                     self.isRunMainLoop = False
+                    pygame.mixer.music.stop()
                     break
                 if event.key == pygame.K_RETURN and self.isGameOver:
                     self.isRunMainLoop = False
+                    pygame.mixer.music.stop()
                     break
                 if event.key == pygame.K_SPACE:
                     if len(self.bulletsList) < self.userShip.maxCountBullets and self.userShip.isBoom == False:
                         self.bulletsList.append(Bullet(self.userShip.posX + self.userShip.width / 2, self.userShip.posY-5, self.userBulletImagesList.copy(), self.userShip.bulletSpeed))
-                        #self.songShot.play()
+                        self.songShot.play()
 
     def userBulletsUpdted(self):
         for indexBull, bullet in enumerate(self.bulletsList):

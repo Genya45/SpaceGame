@@ -6,7 +6,7 @@ from GameProcessClass import GameProcess
 from MenuClass import Menu
 
 pygame.init()
-
+pygame.mouse.set_visible(False)
 
 #WIN_WIDTH = 600
 #WIN_HEIGHT = 600

@@ -29,9 +29,12 @@ class Menu():
         self.isStartGame = False
         self.isCloseGame = False
 
+        self.__MUSIC_BACKGROUND_PATH__ = 'assets/music/BackgroundMenu.mp3'
+
         
         self.imageLoader()
-        self.fontLoader()
+        self.fontLoader()        
+        self.songLoader()
 
 
     def imageLoader(self):
@@ -47,6 +50,10 @@ class Menu():
     def fontLoader(self):
         self.font = pygame.font.Font(self.__FONT_PATH__, 50)
 
+    def songLoader(self):
+        pygame.mixer.music.load(self.__MUSIC_BACKGROUND_PATH__)
+        pygame.mixer.music.set_volume(0.5)
+        pygame.mixer.music.play()
 
     
     def enemyAsteroidUpdated(self):
@@ -76,15 +83,18 @@ class Menu():
             if event.type == pygame.QUIT:
                 self.isRunMainLoop = False
                 self.isCloseGame = True
+                pygame.mixer.music.stop()
                 break
             if event.type == pygame.KEYDOWN:                        
                 if event.key == pygame.K_ESCAPE:
                     self.isRunMainLoop = False
                     self.isCloseGame = True
+                    pygame.mixer.music.stop()
                     break
                 if event.key == pygame.K_RETURN:
                     self.isRunMainLoop = False
                     self.isStartGame = True
+                    pygame.mixer.music.stop()
                     break
 
 
