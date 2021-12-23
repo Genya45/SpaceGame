@@ -1,4 +1,3 @@
-import random
 from BulletClass import Bullet 
 from UserShipClass import UserShip
 from EnemyAsteroidClass import EnemyAsteroid
@@ -7,7 +6,6 @@ import random
 import os
 import pygame
 
-pygame.font.init()
 
 class GameProcess():
     
@@ -26,6 +24,10 @@ class GameProcess():
 
         self.fontScorePath = 'assets/fonts/Space Age.ttf'
         self.fontScore = None
+        self.fontGameOverPath = 'assets/fonts/blocked.ttf'
+        self.fontGameOver = None
+        self.fontContinuePath = 'assets/fonts/solid.ttf'
+        self.fontContinue = None
 
         self.imagePathAsteroids = "assets/images/asteroids/"
         self.imagePathAsteroidsBoom = "assets/images/asteroidsBoom/"
@@ -34,6 +36,8 @@ class GameProcess():
         self.imagePathUserBullet = "assets/images/userBullets/"
 
         self.bulletsList = []
+
+        self.enemyAsteroidTicksMax = 100
         self.enemyAsteroidTicks = 0
         self.enemyAsteroidList = []
         self.asteroidsListImages = []
@@ -42,7 +46,6 @@ class GameProcess():
         self.backgroundTimeTickMax = 10
         self.backgroundPosition = 0
 
-        self.enemyAsteroidTicksMax = 100
 
         self.scoreTickTime = 0
         self.scoreTickTimeMax = 10
@@ -76,13 +79,6 @@ class GameProcess():
                 self.userShip.imageBoomList[i] = pygame.transform.scale(self.userShip.imageBoomList[i], (self.userShip.width, self.userShip.height))
 
 
-
-        listImagesBackgroundSpace = os.listdir(self.imagePathBackgroundSpace)
-        self.imageBackgroundSpaceNumber = random.randint(0, len(listImagesBackgroundSpace) - 1)
-        self.imageBackgroundSpace = pygame.image.load(self.imagePathBackgroundSpace + listImagesBackgroundSpace[self.imageBackgroundSpaceNumber])
-        self.imageBackgroundSpace = pygame.transform.scale(self.imageBackgroundSpace, self.win.get_size())
-
-
         for imageBullet in os.listdir(self.imagePathUserBullet):
             image = pygame.image.load(self.imagePathUserBullet + imageBullet)
             #image = pygame.transform.scale(image, (20,20))
@@ -90,6 +86,8 @@ class GameProcess():
 
     def fontLoader(self):
         self.fontScore = pygame.font.Font(self.fontScorePath, 30)
+        self.fontContinue = pygame.font.Font(self.fontContinuePath, 30)
+        self.fontGameOver = pygame.font.Font(self.fontGameOverPath, 70)
         
 
 
@@ -175,16 +173,13 @@ class GameProcess():
 
             if event.type == pygame.QUIT:
                 self.isRunMainLoop = False
-                print("quit")
                 break
             if event.type == pygame.KEYDOWN:                        
                 if event.key == pygame.K_ESCAPE:
                     self.isRunMainLoop = False
-                    print("quit")
                     break
                 if event.key == pygame.K_RETURN and self.isGameOver:
                     self.isRunMainLoop = False
-                    print("quit")
                     break
                 if event.key == pygame.K_SPACE:
                     if len(self.bulletsList) < self.userShip.maxCountBullets and self.userShip.isBoom == False:
@@ -239,8 +234,8 @@ class GameProcess():
     
     def printDisplayUserLife(self):         
         text = 'X ' + str(self.userShip.life)
-        fontDisplay = self.fontScore.render(text , False, (0, 255, 0))
-        position = [self.win.get_size()[0] - self.fontScore.size(text)[0], self.win.get_size()[1] - self.fontScore.size(text)[1]]
+        fontDisplay = self.fontContinue.render(text , False, (0, 255, 0))
+        position = [self.win.get_size()[0] - self.fontContinue.size(text)[0], self.win.get_size()[1] - self.fontContinue.size(text)[1]]
         position[0] -= 10
         position[1] -= 10
         self.win.blit(fontDisplay, position) 
@@ -264,36 +259,39 @@ class GameProcess():
         rectBcg[1] /= 4
         rectBcg.append(listWinSize.copy()[0]/2)
         rectBcg.append(listWinSize.copy()[1]/2)
-        pygame.draw.rect(self.win, (0, 0, 0), (rectBcg) )   
+        pygame.draw.rect(self.win, (0, 0, 0), (rectBcg))   
         
+        
+
         text = 'GAME OVER'
-        fontScoreDisplay = self.fontScore.render(text , False, (255, 0, 0))
+        fontDisplay = self.fontGameOver.render(text , False, (255, 0, 0))
         position = []
-        position.append(self.win.get_size()[0]/2 - self.fontScore.size(text)[0]/2)
-        position.append(self.win.get_size()[1]/4)
-        self.win.blit(fontScoreDisplay, position) 
+        position.append(self.win.get_size()[0]/2 - self.fontGameOver.size(text)[0]/2)
+        position.append(self.win.get_size()[1]/4 + self.fontGameOver.size(text)[1]/2)
+        self.win.blit(fontDisplay, position) 
+        
         
         text = 'Score:'
-        fontScoreDisplay = self.fontScore.render(text , False, (0, 255, 0))
+        fontDisplay = self.fontScore.render(text , False, (0, 255, 0))
         position = []
         position.append(self.win.get_size()[0]/3 - self.fontScore.size(text)[0]/2)
         position.append(self.win.get_size()[1]/2)
-        self.win.blit(fontScoreDisplay, position) 
+        self.win.blit(fontDisplay, position) 
 
         text = str(self.score)
-        fontScoreDisplay = self.fontScore.render(text , False, (0, 255, 0))
+        fontDisplay = self.fontScore.render(text , False, (0, 255, 0))
         position = []
         position.append(self.win.get_size()[0] - self.win.get_size()[0]/3 - self.fontScore.size(text)[0]/2)
         position.append(self.win.get_size()[1]/2)
-        self.win.blit(fontScoreDisplay, position)    
+        self.win.blit(fontDisplay, position)    
 
-                
+        
         text = 'PRESS ENTER TO CONTINUE'
-        fontScoreDisplay = self.fontScore.render(text , False, (0, 0, 255))
+        fontDisplay = self.fontContinue.render(text , False, (255, 0, 0))
         position = []
-        position.append(self.win.get_size()[0]/2 - self.fontScore.size(text)[0]/2)
-        position.append((self.win.get_size()[1]/4 + self.win.get_size()[1]/2) - self.fontScore.size(text)[1])
-        self.win.blit(fontScoreDisplay, position) 
+        position.append(self.win.get_size()[0]/2 - self.fontContinue.size(text)[0]/2)
+        position.append((self.win.get_size()[1]/4 + self.win.get_size()[1]/2) - self.fontContinue.size(text)[1]*2)
+        self.win.blit(fontDisplay, position) 
 
 
 

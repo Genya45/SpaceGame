@@ -19,7 +19,7 @@ class UserShip:
         #   скорость полета патронов
         self.bulletSpeed = 4
         #   текущее количество жизней 
-        self.life = 3
+        self.life = 1
 
         #   изображение снаряда
         self.imageList = imageList
