@@ -33,3 +33,7 @@ class Bullet:
         self._update_image()
         
         #self.posX += random.randint(1,20) - 10
+
+        
+if __name__ == "__main__":
+    print("It is not a main module")

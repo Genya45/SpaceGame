@@ -7,6 +7,7 @@ import random
 import os
 import pygame
 
+pygame.font.init()
 
 class GameProcess():
     
@@ -22,6 +23,9 @@ class GameProcess():
         self.imageBackgroundSpaceNumber = None
         self.userBulletImagesList = []        
         self.enemyAsteroidBoomImagesList = []
+
+        self.fontScorePath = 'assets/fonts/Space Age.ttf'
+        self.fontScore = None
 
         self.imagePathAsteroids = "assets/images/asteroids/"
         self.imagePathAsteroidsBoom = "assets/images/asteroidsBoom/"
@@ -40,10 +44,16 @@ class GameProcess():
 
         self.enemyAsteroidTicksMax = 100
 
+        self.scoreTickTime = 0
+        self.scoreTickTimeMax = 10
+        self.score = 0
+
         self.userShip = UserShip(self.winWidth/2, self.winHeight-self.winHeight/3, self.winWidth, self.winHeight)
 
+        self.isGameOver = False
 
         self.imageLoader()
+        self.fontLoader()
 
 
     def imageLoader(self):
@@ -61,6 +71,10 @@ class GameProcess():
             imgStarship = pygame.transform.scale(imgStarship, (self.userShip.width, self.userShip.height))
             self.imageStarShipList.append(imgStarship)
         self.userShip.imageList = self.imageStarShipList
+        self.userShip.imageBoomList = self.enemyAsteroidBoomImagesList
+        for i in range(0, len(self.enemyAsteroidBoomImagesList)):
+                self.userShip.imageBoomList[i] = pygame.transform.scale(self.userShip.imageBoomList[i], (self.userShip.width, self.userShip.height))
+
 
 
         listImagesBackgroundSpace = os.listdir(self.imagePathBackgroundSpace)
@@ -73,6 +87,9 @@ class GameProcess():
             image = pygame.image.load(self.imagePathUserBullet + imageBullet)
             #image = pygame.transform.scale(image, (20,20))
             self.userBulletImagesList.append(image)
+
+    def fontLoader(self):
+        self.fontScore = pygame.font.Font(self.fontScorePath, 30)
         
 
 
@@ -105,6 +122,7 @@ class GameProcess():
                         self.bulletsList.pop(indexBull)
                         #self.enemyAsteroidList.pop(indexAsteroid)
                         enemyAsteroid.isBoom = True
+                        self.score += 100
                         continue
 
                 #Пример работы алгоритма.
@@ -117,7 +135,11 @@ class GameProcess():
                 if (     enemyAsteroid.posX > (self.userShip.posX - enemyAsteroid.radius)) and \
                         (enemyAsteroid.posX < (self.userShip.posX + self.userShip.width + enemyAsteroid.radius)) and \
                         (enemyAsteroid.posY > (self.userShip.posY - enemyAsteroid.radius)) and \
-                        (enemyAsteroid.posY < (self.userShip.posY + self.userShip.height + enemyAsteroid.radius)):
+                        (enemyAsteroid.posY < (self.userShip.posY + self.userShip.height + enemyAsteroid.radius) and
+                        self.userShip.isBoom == False):
+                    self.userShip.shipBoom()
+                    if self.userShip.life <= 0:
+                        self.isGameOver = True
                     if len(self.enemyAsteroidList):
                         self.enemyAsteroidList.pop(indexAsteroid)                
                         continue
@@ -160,8 +182,12 @@ class GameProcess():
                     self.isRunMainLoop = False
                     print("quit")
                     break
+                if event.key == pygame.K_RETURN and self.isGameOver:
+                    self.isRunMainLoop = False
+                    print("quit")
+                    break
                 if event.key == pygame.K_SPACE:
-                    if len(self.bulletsList) < self.userShip.maxCountBullets:
+                    if len(self.bulletsList) < self.userShip.maxCountBullets and self.userShip.isBoom == False:
                         self.bulletsList.append(Bullet(self.userShip.posX + self.userShip.width / 2, self.userShip.posY-5, self.userBulletImagesList.copy(), self.userShip.bulletSpeed))
 
     def userBulletsUpdted(self):
@@ -192,17 +218,96 @@ class GameProcess():
         self.win.blit(self.imageBackgroundSpace, (0,self.backgroundPosition - self.winHeight))
         self.win.blit(self.imageBackgroundSpace, (0, self.backgroundPosition))
 
+    def updateScore(self):
+        if(self.userShip.currentDirection == 2):
+            self.scoreTickTimeMax = 5
+        elif(self.userShip.currentDirection == -2):
+            self.scoreTickTimeMax = 20
+        else:
+            self.scoreTickTimeMax = 10
+
+        self.scoreTickTime += 1
+        if self.scoreTickTime >= self.scoreTickTimeMax:
+            self.scoreTickTime = 0
+            self.score += 1
+
+    def printDisplayText(self):  
+        text = 'Score: ' + str(self.score)
+        fontScoreDisplay = self.fontScore.render(text , False, (0, 255, 0))
+        position = [10, self.win.get_size()[1] - (self.fontScore.size(text)[1])] 
+        self.win.blit(fontScoreDisplay, position)
+    
+    def printDisplayUserLife(self):         
+        text = 'X ' + str(self.userShip.life)
+        fontDisplay = self.fontScore.render(text , False, (0, 255, 0))
+        position = [self.win.get_size()[0] - self.fontScore.size(text)[0], self.win.get_size()[1] - self.fontScore.size(text)[1]]
+        position[0] -= 10
+        position[1] -= 10
+        self.win.blit(fontDisplay, position) 
+
+        image = self.imageStarShipList[0]
+        image = pygame.transform.scale(image, (50,50))
+        position[0] = position[0] - (image.get_size()[0] + 10)
+        position[1] -= 10
+        self.win.blit(image, position) 
+        
+
 
 
     def userShipUpdted(self):
         self.win.blit(self.userShip.image, (self.userShip.posX, self.userShip.posY))
 
+    def gameOver(self):
+        listWinSize = list(self.win.get_size())
+        rectBcg = listWinSize.copy()
+        rectBcg[0] /= 4
+        rectBcg[1] /= 4
+        rectBcg.append(listWinSize.copy()[0]/2)
+        rectBcg.append(listWinSize.copy()[1]/2)
+        pygame.draw.rect(self.win, (0, 0, 0), (rectBcg) )   
+        
+        text = 'GAME OVER'
+        fontScoreDisplay = self.fontScore.render(text , False, (255, 0, 0))
+        position = []
+        position.append(self.win.get_size()[0]/2 - self.fontScore.size(text)[0]/2)
+        position.append(self.win.get_size()[1]/4)
+        self.win.blit(fontScoreDisplay, position) 
+        
+        text = 'Score:'
+        fontScoreDisplay = self.fontScore.render(text , False, (0, 255, 0))
+        position = []
+        position.append(self.win.get_size()[0]/3 - self.fontScore.size(text)[0]/2)
+        position.append(self.win.get_size()[1]/2)
+        self.win.blit(fontScoreDisplay, position) 
+
+        text = str(self.score)
+        fontScoreDisplay = self.fontScore.render(text , False, (0, 255, 0))
+        position = []
+        position.append(self.win.get_size()[0] - self.win.get_size()[0]/3 - self.fontScore.size(text)[0]/2)
+        position.append(self.win.get_size()[1]/2)
+        self.win.blit(fontScoreDisplay, position)    
+
+                
+        text = 'PRESS ENTER TO CONTINUE'
+        fontScoreDisplay = self.fontScore.render(text , False, (0, 0, 255))
+        position = []
+        position.append(self.win.get_size()[0]/2 - self.fontScore.size(text)[0]/2)
+        position.append((self.win.get_size()[1]/4 + self.win.get_size()[1]/2) - self.fontScore.size(text)[1])
+        self.win.blit(fontScoreDisplay, position) 
+
+
 
     def updateDisplay(self):
         self.updateBackgroundImage()
+        if self.isGameOver:
+            self.gameOver()   
+        else:            
+            self.updateScore()
+            self.printDisplayText()
+            self.printDisplayUserLife()
+            self.userBulletsUpdted()
+            self.userShipUpdted()   
         self.enemyAsteroidUpdated()
-        self.userBulletsUpdted()
-        self.userShipUpdted()       
         pygame.display.update()
 
     def main_process_update(self):
@@ -211,3 +316,5 @@ class GameProcess():
         self.updateDisplay()
 
 
+if __name__ == "__main__":
+    print("It is not a main module")

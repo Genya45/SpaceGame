@@ -30,12 +30,12 @@ def initGameProcess(win):
 
 if __name__ == "__main__":          #   входная точка
     #   размеры окна
-    winWidth = 600
-    winHeight = 600
+    winWidth = 1920
+    winHeight = 1080
 
     #   созданное окно
     #win = pygame.display.set_mode((winWidth,winHeight), pygame.RESIZABLE | pygame.DOUBLEBUF | pygame.HWSURFACE)
-    win = pygame.display.set_mode((1920,1080), pygame.FULLSCREEN | pygame.DOUBLEBUF | pygame.HWSURFACE)
+    win = pygame.display.set_mode((winWidth, winHeight), pygame.FULLSCREEN | pygame.DOUBLEBUF | pygame.HWSURFACE)
     #   название окна
     pygame.display.set_caption("Cosmo Game")
     initGameProcess(win)               #   вызов функции игры
